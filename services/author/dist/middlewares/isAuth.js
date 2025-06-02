@@ -1,10 +1,11 @@
-import jwt from 'jsonwebtoken';
+import jwt from "jsonwebtoken";
 export const isAuth = async (req, res, next) => {
     try {
         const authHeader = req.headers.authorization;
+        console.log(authHeader);
         if (!authHeader || !authHeader.startsWith("Bearer ")) {
             res.status(401).json({
-                message: "Please Login - No authHeader"
+                message: "Please Login - No authHeader",
             });
             return;
         }
@@ -12,7 +13,7 @@ export const isAuth = async (req, res, next) => {
         const decodeValue = jwt.verify(token, process.env.JWT);
         if (!decodeValue || !decodeValue.user) {
             res.status(401).json({
-                message: "Invalid token"
+                message: "Invalid token",
             });
             return;
         }
@@ -22,7 +23,7 @@ export const isAuth = async (req, res, next) => {
     catch (error) {
         console.log("JWT verification error: ", error);
         res.status(401).json({
-            message: "Please Login - Jwt error"
+            message: "Please Login - Jwt error",
         });
     }
 };
