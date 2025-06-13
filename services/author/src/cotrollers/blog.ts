@@ -67,4 +67,41 @@ export const updateBlog = TryCatch(async (req: AuthenticatedRequest, res) => {
     });
     return;
   }
+  const cloud = await cloudinary.v2.uploader.upload(fileBuffer.content, {
+    folder: "blogs",
+  });
+
+  imageUrl = cloud.secure_url;
+
+  const updatedBlog = await sql`UPDATE blogs SET 
+  title=${title || blog[0].title},
+  description=${description || blog[0].description},
+  blogcontent=${blogcontent || blog[0].blogcontent},
+  category=${category || blog[0].category},
+  image=${imageUrl}
+  WHERE id=${id}
+  RETURNING *
+  `;
+  res.json({ message: "Blog updated", blog: updatedBlog[0] });
+});
+
+export const deleteBlog = TryCatch(async (req: AuthenticatedRequest, res) => {
+  const blog = await sql`SELECT * FROM blogs WHERE id=${req.params.id}`;
+  if (!blog.length) {
+    res.status(400).json({
+      message: "No blog with this id",
+    });
+    return;
+  }
+
+  if (blog[0].author !== req.user?._id) {
+    res.status(400).json({
+      message: "You are not author of this blog",
+    });
+    return;
+  }
+  await sql`DELETE FROM saveblogs WHERE blogid=${req.params.id}`;
+  await sql`DELETE FROM comments WHERE blogid=${req.params.id}`;
+  await sql`DELETE FROM blogs WHERE id=${req.params.id}`;
+  res.json({ message: "Blog Deleted" });
 });

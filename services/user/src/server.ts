@@ -3,6 +3,8 @@ import dotenv from 'dotenv'
 import connectDb from './utils/db.js'
 import userRoute from './routes/user.js'
 import {v2} from 'cloudinary'
+import cors from 'cors'
+
 dotenv.config()
 const app=expres()
 const port=process.env.PORT;
@@ -14,6 +16,7 @@ v2.config({
 })
 
 app.use(expres.json())
+app.use(cors())
 
 connectDb();
 
